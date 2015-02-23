@@ -11,11 +11,11 @@ using System.Threading.Tasks;
 using Microsoft.AspNet.FeatureModel;
 using Microsoft.AspNet.Http.Core.Collections;
 using Microsoft.AspNet.Http.Core.Infrastructure;
-using Microsoft.AspNet.Http.Core.Security;
+using Microsoft.AspNet.Http.Core.Authentication;
 using Microsoft.AspNet.Http.Infrastructure;
 using Microsoft.AspNet.Http.Interfaces;
-using Microsoft.AspNet.Http.Interfaces.Security;
-using Microsoft.AspNet.Http.Security;
+using Microsoft.AspNet.Http.Interfaces.Authentication;
+using Microsoft.AspNet.Http.Authentication;
 
 namespace Microsoft.AspNet.Http.Core
 {

@@ -8,7 +8,7 @@ using System.Net.WebSockets;
 using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.AspNet.Http.Security;
+using Microsoft.AspNet.Http.Authentication;
 
 namespace Microsoft.AspNet.Http
 {

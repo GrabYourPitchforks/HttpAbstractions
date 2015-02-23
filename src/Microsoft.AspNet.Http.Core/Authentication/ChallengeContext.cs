@@ -3,12 +3,9 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.AspNet.Http.Interfaces.Security;
+using Microsoft.AspNet.Http.Interfaces.Authentication;
 
-namespace Microsoft.AspNet.Http.Core.Security
+namespace Microsoft.AspNet.Http.Core.Authentication
 {
     public class ChallengeContext : IChallengeContext
     {

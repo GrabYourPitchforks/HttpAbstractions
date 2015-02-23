@@ -3,9 +3,9 @@
 
 using System;
 using System.Collections.Generic;
-using Microsoft.AspNet.Http.Interfaces.Security;
+using Microsoft.AspNet.Http.Interfaces.Authentication;
 
-namespace Microsoft.AspNet.Http.Core.Security
+namespace Microsoft.AspNet.Http.Core.Authentication
 {
     public class SignOutContext : ISignOutContext
     {

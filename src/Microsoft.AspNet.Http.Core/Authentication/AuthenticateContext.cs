@@ -3,10 +3,10 @@
 
 using System.Collections.Generic;
 using System.Security.Claims;
-using Microsoft.AspNet.Http.Interfaces.Security;
-using Microsoft.AspNet.Http.Security;
+using Microsoft.AspNet.Http.Interfaces.Authentication;
+using Microsoft.AspNet.Http.Authentication;
 
-namespace Microsoft.AspNet.Http.Core.Security
+namespace Microsoft.AspNet.Http.Core.Authentication
 {
     public class AuthenticateContext : IAuthenticateContext
     {

@@ -4,7 +4,7 @@
 using System.Collections.Generic;
 using System.Security.Claims;
 
-namespace Microsoft.AspNet.Http.Interfaces.Security
+namespace Microsoft.AspNet.Http.Interfaces.Authentication
 {
     public interface IAuthenticateContext
     {
