@@ -7,7 +7,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNet.FeatureModel;
-using Microsoft.AspNet.Http.Core.Security;
+using Microsoft.AspNet.Http.Core.Authentication;
 using Microsoft.AspNet.Http.Interfaces.Authentication;
 using Xunit;
 
