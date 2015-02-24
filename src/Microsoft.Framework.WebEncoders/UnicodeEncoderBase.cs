@@ -6,7 +6,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Text;
-using Microsoft.Framework.Internal;
 
 namespace Microsoft.Framework.WebEncoders
 {
@@ -84,9 +83,17 @@ namespace Microsoft.Framework.WebEncoders
         /// <summary>
         /// Entry point to the encoder.
         /// </summary>
-        public void Encode([NotNull] char[] value, int startIndex, int charCount, [NotNull] TextWriter output)
+        public void Encode(char[] value, int startIndex, int charCount, TextWriter output)
         {
             // Input checking
+            if (value == null)
+            {
+                throw new ArgumentNullException(nameof(value));
+            }
+            if (output == null)
+            {
+                throw new ArgumentNullException(nameof(output));
+            }
             ValidateInputs(startIndex, charCount, actualInputLength: value.Length);
 
             if (charCount != 0)
@@ -137,9 +144,17 @@ namespace Microsoft.Framework.WebEncoders
         /// <summary>
         /// Entry point to the encoder.
         /// </summary>
-        public void Encode([NotNull] string value, int startIndex, int charCount, [NotNull] TextWriter output)
+        public void Encode(string value, int startIndex, int charCount, TextWriter output)
         {
             // Input checking
+            if (value == null)
+            {
+                throw new ArgumentNullException(nameof(value));
+            }
+            if (output == null)
+            {
+                throw new ArgumentNullException(nameof(output));
+            }
             ValidateInputs(startIndex, charCount, actualInputLength: value.Length);
 
             if (charCount != 0)
