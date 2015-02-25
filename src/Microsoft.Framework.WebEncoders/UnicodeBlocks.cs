@@ -23,20 +23,19 @@ namespace Microsoft.Framework.WebEncoders
         {
             get
             {
-                return Volatile.Read(ref _none) ?? CreateBlock(ref _none, '\u0000', '\u0000');
+                return Volatile.Read(ref _none) ?? CreateEmptyBlock(ref _none);
             }
         }
         private static UnicodeBlock _none;
 
         /// <summary>
-        /// Represents all blocks in the Unicode Basic Multilingual Plane.
-        /// This block spans code points in the range U+0000..U+FFFF.
+        /// Represents a block containing all characters in the Unicode Basic Multilingual Plane (U+0000..U+FFFF).
         /// </summary>
         public static UnicodeBlock All
         {
             get
             {
-                return Volatile.Read(ref _all) ?? CreateBlock(ref _none, '\u0000', '\uFFFF');
+                return Volatile.Read(ref _all) ?? CreateBlock(ref _all, '\u0000', '\uFFFF');
             }
         }
         private static UnicodeBlock _all;
@@ -47,7 +46,7 @@ namespace Microsoft.Framework.WebEncoders
             // If the block hasn't been created, create it now.
             // It's ok if two threads race and one overwrites the other's 'block' value.
             Debug.Assert(last > first, "Code points were specified out of order.");
-            var newBlock = new UnicodeBlock(first, 1 + (int)(last - first));
+            var newBlock = UnicodeBlock.FromCharacterRange(first, last);
             Volatile.Write(ref block, newBlock);
             return newBlock;
         }

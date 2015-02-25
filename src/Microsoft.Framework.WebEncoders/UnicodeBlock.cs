@@ -44,5 +44,23 @@ namespace Microsoft.Framework.WebEncoders
         /// The first code point in this block.
         /// </summary>
         public int FirstCodePoint { get; }
+
+        public static UnicodeBlock FromCharacterRange(char firstChar, char lastChar)
+        {
+            // Parameter checking: the first code point must be U+nnn0 and the last
+            // code point must be U+nnnF. We already can't span planes since 'char'
+            // allows only Basic Multilingual Plane characters.
+            // See http://unicode.org/faq/blocks_ranges.html for more info.
+            if ((firstChar & 0xF) != 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(firstChar));
+            }
+            if (lastChar < firstChar || (lastChar & 0xF) != 0xF)
+            {
+                throw new ArgumentOutOfRangeException(nameof(lastChar));
+            }
+
+            return new UnicodeBlock(firstChar, 1 + (int)(lastChar - firstChar));
+        }
     }
 }

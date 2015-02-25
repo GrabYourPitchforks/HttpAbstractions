@@ -54,6 +54,9 @@ namespace Microsoft.Framework.WebEncoders
         /// <summary>
         /// Allows all characters in the specified Unicode character block through the filter.
         /// </summary>
+        /// <returns>
+        /// The 'this' instance.
+        /// </returns>
         public CodePointFilter AllowBlock([NotNull] UnicodeBlock block)
         {
             int firstCodePoint = block.FirstCodePoint;
@@ -68,6 +71,9 @@ namespace Microsoft.Framework.WebEncoders
         /// <summary>
         /// Allows all characters in the specified Unicode character blocks through the filter.
         /// </summary>
+        /// <returns>
+        /// The 'this' instance.
+        /// </returns>
         public CodePointFilter AllowBlocks(params UnicodeBlock[] blocks)
         {
             if (blocks != null)
@@ -83,6 +89,9 @@ namespace Microsoft.Framework.WebEncoders
         /// <summary>
         /// Allows the specified character through the filter.
         /// </summary>
+        /// <returns>
+        /// The 'this' instance.
+        /// </returns>
         public CodePointFilter AllowChar(char c)
         {
             _allowedCharsBitmap.AllowCharacter(c);
@@ -92,6 +101,9 @@ namespace Microsoft.Framework.WebEncoders
         /// <summary>
         /// Allows the specified characters through the filter.
         /// </summary>
+        /// <returns>
+        /// The 'this' instance.
+        /// </returns>
         public CodePointFilter AllowChars(params char[] chars)
         {
             if (chars != null)
@@ -107,6 +119,9 @@ namespace Microsoft.Framework.WebEncoders
         /// <summary>
         /// Allows all characters in the specified string through the filter.
         /// </summary>
+        /// <returns>
+        /// The 'this' instance.
+        /// </returns>
         public CodePointFilter AllowChars([NotNull] string chars)
         {
             for (int i = 0; i < chars.Length; i++)
@@ -119,6 +134,9 @@ namespace Microsoft.Framework.WebEncoders
         /// <summary>
         /// Allows all characters approved by the specified filter through this filter.
         /// </summary>
+        /// <returns>
+        /// The 'this' instance.
+        /// </returns>
         public CodePointFilter AllowFilter([NotNull] ICodePointFilter filter)
         {
             foreach (var allowedCodePoint in filter.GetAllowedCodePoints())
@@ -136,6 +154,9 @@ namespace Microsoft.Framework.WebEncoders
         /// <summary>
         /// Disallows all characters in the specified Unicode character block through the filter.
         /// </summary>
+        /// <returns>
+        /// The 'this' instance.
+        /// </returns>
         public CodePointFilter ForbidBlock([NotNull] UnicodeBlock block)
         {
             int firstCodePoint = block.FirstCodePoint;
@@ -150,6 +171,9 @@ namespace Microsoft.Framework.WebEncoders
         /// <summary>
         /// Disallows all characters in the specified Unicode character blocks through the filter.
         /// </summary>
+        /// <returns>
+        /// The 'this' instance.
+        /// </returns>
         public CodePointFilter ForbidBlocks(params UnicodeBlock[] blocks)
         {
             if (blocks != null)
@@ -165,6 +189,9 @@ namespace Microsoft.Framework.WebEncoders
         /// <summary>
         /// Disallows the specified character through the filter.
         /// </summary>
+        /// <returns>
+        /// The 'this' instance.
+        /// </returns>
         public CodePointFilter ForbidChar(char c)
         {
             _allowedCharsBitmap.ForbidCharacter(c);
@@ -174,6 +201,9 @@ namespace Microsoft.Framework.WebEncoders
         /// <summary>
         /// Disallows the specified characters through the filter.
         /// </summary>
+        /// <returns>
+        /// The 'this' instance.
+        /// </returns>
         public CodePointFilter ForbidChars(params char[] chars)
         {
             if (chars != null)
@@ -189,6 +219,9 @@ namespace Microsoft.Framework.WebEncoders
         /// <summary>
         /// Disallows all characters in the specified string through the filter.
         /// </summary>
+        /// <returns>
+        /// The 'this' instance.
+        /// </returns>
         public CodePointFilter ForbidChars([NotNull] string chars)
         {
             for (int i = 0; i < chars.Length; i++)
@@ -221,6 +254,14 @@ namespace Microsoft.Framework.WebEncoders
             }
         }
 
+        /// <summary>
+        /// Returns a value stating whether the given character is allowed through the filter.
+        /// </summary>
+        public bool IsCharacterAllowed(char c)
+        {
+            return _allowedCharsBitmap.IsCharacterAllowed(c);
+        }
+        
         /// <summary>
         /// Wraps the provided filter as a CodePointFilter, avoiding the clone if possible.
         /// </summary>

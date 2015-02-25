@@ -16,9 +16,8 @@ namespace Microsoft.Framework.WebEncoders
         public void Ctor_WithCustomFilters()
         {
             // Arrange
-            CustomCodePointFilter filter1 = new CustomCodePointFilter('a', 'b');
-            CustomCodePointFilter filter2 = new CustomCodePointFilter('\0', '&', '\uFFFF', 'd');
-            UnicodeEncoderBase encoder = new CustomUnicodeEncoderBase(filter1, filter2);
+            var filter = new CodePointFilter(UnicodeBlocks.None).AllowChars("ab").AllowChars('\0', '&', '\uFFFF', 'd');
+            UnicodeEncoderBase encoder = new CustomUnicodeEncoderBase(filter);
 
             // Act & assert
             Assert.Equal("a", encoder.Encode("a"));
@@ -31,22 +30,10 @@ namespace Microsoft.Framework.WebEncoders
         }
 
         [Fact]
-        public void Ctor_WithEmptyParameters_DefaultsToNothing()
+        public void Ctor_WithUnicodeBlocks()
         {
             // Arrange
-            UnicodeEncoderBase encoder = new CustomUnicodeEncoderBase(new ICodePointFilter[0]);
-
-            // Act & assert
-            Assert.Equal("[U+0061]", encoder.Encode("a"));
-            Assert.Equal("[U+00E9]", encoder.Encode("\u00E9" /* LATIN SMALL LETTER E WITH ACUTE */));
-            Assert.Equal("[U+2601]", encoder.Encode("\u2601" /* CLOUD */));
-        }
-
-        [Fact]
-        public void Ctor_WithMultipleParameters_AllowsBitwiseOrOfCodePoints()
-        {
-            // Arrange
-            UnicodeEncoderBase encoder = new CustomUnicodeEncoderBase(CodePointFilters.Latin1Supplement, CodePointFilters.MiscellaneousSymbols);
+            UnicodeEncoderBase encoder = new CustomUnicodeEncoderBase(new CodePointFilter(UnicodeBlocks.Latin1Supplement, UnicodeBlocks.MiscellaneousSymbols));
 
             // Act & assert
             Assert.Equal("[U+0061]", encoder.Encode("a"));
@@ -58,7 +45,7 @@ namespace Microsoft.Framework.WebEncoders
         public void Encode_AllRangesAllowed_StillEncodesForbiddenChars_Simple()
         {
             // Arrange
-            UnicodeEncoderBase encoder = new CustomUnicodeEncoderBase(CodePointFilters.All);
+            UnicodeEncoderBase encoder = new CustomUnicodeEncoderBase(UnicodeBlocks.All);
             const string input = "Hello <>&\'\"+ there!";
             const string expected = "Hello [U+003C][U+003E][U+0026][U+0027][U+0022][U+002B] there!";
 
@@ -70,7 +57,7 @@ namespace Microsoft.Framework.WebEncoders
         public void Encode_AllRangesAllowed_StillEncodesForbiddenChars_Extended()
         {
             // Arrange
-            UnicodeEncoderBase encoder = new CustomUnicodeEncoderBase(CodePointFilters.All);
+            UnicodeEncoderBase encoder = new CustomUnicodeEncoderBase(UnicodeBlocks.All);
 
             // Act & assert - BMP chars
             for (int i = 0; i <= 0xFFFF; i++)
@@ -133,7 +120,7 @@ namespace Microsoft.Framework.WebEncoders
         public void Encode_BadSurrogates_ReturnsUnicodeReplacementChar()
         {
             // Arrange
-            UnicodeEncoderBase encoder = new CustomUnicodeEncoderBase(CodePointFilters.All); // allow all codepoints
+            UnicodeEncoderBase encoder = new CustomUnicodeEncoderBase(UnicodeBlocks.All); // allow all codepoints
 
             // "a<unpaired leading>b<unpaired trailing>c<trailing before leading>d<unpaired trailing><valid>e<high at end of string>"
             const string input = "a\uD800b\uDFFFc\uDFFF\uD800d\uDFFF\uD800\uDFFFe\uD800";
@@ -150,7 +137,7 @@ namespace Microsoft.Framework.WebEncoders
         public void Encode_EmptyStringInput_ReturnsEmptyString()
         {
             // Arrange
-            UnicodeEncoderBase encoder = new CustomUnicodeEncoderBase(CodePointFilters.All);
+            UnicodeEncoderBase encoder = new CustomUnicodeEncoderBase(UnicodeBlocks.All);
 
             // Act & assert
             Assert.Equal("", encoder.Encode(""));
@@ -160,7 +147,7 @@ namespace Microsoft.Framework.WebEncoders
         public void Encode_InputDoesNotRequireEncoding_ReturnsOriginalStringInstance()
         {
             // Arrange
-            UnicodeEncoderBase encoder = new CustomUnicodeEncoderBase(CodePointFilters.All);
+            UnicodeEncoderBase encoder = new CustomUnicodeEncoderBase(UnicodeBlocks.All);
             string input = "Hello, there!";
 
             // Act & assert
@@ -171,7 +158,7 @@ namespace Microsoft.Framework.WebEncoders
         public void Encode_NullInput_ReturnsNull()
         {
             // Arrange
-            UnicodeEncoderBase encoder = new CustomUnicodeEncoderBase(CodePointFilters.All);
+            UnicodeEncoderBase encoder = new CustomUnicodeEncoderBase(UnicodeBlocks.All);
 
             // Act & assert
             Assert.Null(encoder.Encode(null));
@@ -180,25 +167,25 @@ namespace Microsoft.Framework.WebEncoders
         [Fact]
         public void Encode_WithCharsRequiringEncodingAtBeginning()
         {
-            Assert.Equal("[U+0026]Hello, there!", new CustomUnicodeEncoderBase(CodePointFilters.All).Encode("&Hello, there!"));
+            Assert.Equal("[U+0026]Hello, there!", new CustomUnicodeEncoderBase(UnicodeBlocks.All).Encode("&Hello, there!"));
         }
 
         [Fact]
         public void Encode_WithCharsRequiringEncodingAtEnd()
         {
-            Assert.Equal("Hello, there![U+0026]", new CustomUnicodeEncoderBase(CodePointFilters.All).Encode("Hello, there!&"));
+            Assert.Equal("Hello, there![U+0026]", new CustomUnicodeEncoderBase(UnicodeBlocks.All).Encode("Hello, there!&"));
         }
 
         [Fact]
         public void Encode_WithCharsRequiringEncodingInMiddle()
         {
-            Assert.Equal("Hello, [U+0026]there!", new CustomUnicodeEncoderBase(CodePointFilters.All).Encode("Hello, &there!"));
+            Assert.Equal("Hello, [U+0026]there!", new CustomUnicodeEncoderBase(UnicodeBlocks.All).Encode("Hello, &there!"));
         }
 
         [Fact]
         public void Encode_WithCharsRequiringEncodingInterspersed()
         {
-            Assert.Equal("Hello, [U+003C]there[U+003E]!", new CustomUnicodeEncoderBase(CodePointFilters.All).Encode("Hello, <there>!"));
+            Assert.Equal("Hello, [U+003C]there[U+003E]!", new CustomUnicodeEncoderBase(UnicodeBlocks.All).Encode("Hello, <there>!"));
         }
 
         [Fact]
@@ -235,7 +222,7 @@ namespace Microsoft.Framework.WebEncoders
         public void Encode_CharArray_AllCharsValid()
         {
             // Arrange
-            CustomUnicodeEncoderBase encoder = new CustomUnicodeEncoderBase(CodePointFilters.All);
+            CustomUnicodeEncoderBase encoder = new CustomUnicodeEncoderBase(UnicodeBlocks.All);
             StringWriter output = new StringWriter();
 
             // Act
@@ -249,7 +236,7 @@ namespace Microsoft.Framework.WebEncoders
         public void Encode_CharArray_AllCharsInvalid()
         {
             // Arrange
-            CustomUnicodeEncoderBase encoder = new CustomUnicodeEncoderBase(CodePointFilters.None);
+            CustomUnicodeEncoderBase encoder = new CustomUnicodeEncoderBase(UnicodeBlocks.None);
             StringWriter output = new StringWriter();
 
             // Act
@@ -263,7 +250,7 @@ namespace Microsoft.Framework.WebEncoders
         public void Encode_CharArray_SomeCharsValid()
         {
             // Arrange
-            CustomUnicodeEncoderBase encoder = new CustomUnicodeEncoderBase(CodePointFilters.All);
+            CustomUnicodeEncoderBase encoder = new CustomUnicodeEncoderBase(UnicodeBlocks.All);
             StringWriter output = new StringWriter();
 
             // Act
@@ -307,7 +294,7 @@ namespace Microsoft.Framework.WebEncoders
         public void Encode_StringSubstring_AllCharsValid()
         {
             // Arrange
-            CustomUnicodeEncoderBase encoder = new CustomUnicodeEncoderBase(CodePointFilters.All);
+            CustomUnicodeEncoderBase encoder = new CustomUnicodeEncoderBase(UnicodeBlocks.All);
             StringWriter output = new StringWriter();
 
             // Act
@@ -321,7 +308,7 @@ namespace Microsoft.Framework.WebEncoders
         public void Encode_StringSubstring_EntireString_AllCharsValid_ForwardDirectlyToOutput()
         {
             // Arrange
-            CustomUnicodeEncoderBase encoder = new CustomUnicodeEncoderBase(CodePointFilters.All);
+            CustomUnicodeEncoderBase encoder = new CustomUnicodeEncoderBase(UnicodeBlocks.All);
             var mockWriter = new Mock<TextWriter>(MockBehavior.Strict);
             mockWriter.Setup(o => o.Write("abc")).Verifiable();
 
@@ -336,7 +323,7 @@ namespace Microsoft.Framework.WebEncoders
         public void Encode_StringSubstring_AllCharsInvalid()
         {
             // Arrange
-            CustomUnicodeEncoderBase encoder = new CustomUnicodeEncoderBase(CodePointFilters.None);
+            CustomUnicodeEncoderBase encoder = new CustomUnicodeEncoderBase(UnicodeBlocks.None);
             StringWriter output = new StringWriter();
 
             // Act
@@ -350,7 +337,7 @@ namespace Microsoft.Framework.WebEncoders
         public void Encode_StringSubstring_SomeCharsValid()
         {
             // Arrange
-            CustomUnicodeEncoderBase encoder = new CustomUnicodeEncoderBase(CodePointFilters.All);
+            CustomUnicodeEncoderBase encoder = new CustomUnicodeEncoderBase(UnicodeBlocks.All);
             StringWriter output = new StringWriter();
 
             // Act
@@ -364,7 +351,7 @@ namespace Microsoft.Framework.WebEncoders
         public void Encode_StringSubstring_EntireString_SomeCharsValid()
         {
             // Arrange
-            CustomUnicodeEncoderBase encoder = new CustomUnicodeEncoderBase(CodePointFilters.All);
+            CustomUnicodeEncoderBase encoder = new CustomUnicodeEncoderBase(UnicodeBlocks.All);
             StringWriter output = new StringWriter();
 
             // Act
@@ -400,8 +387,13 @@ namespace Microsoft.Framework.WebEncoders
             // We pass a (known bad) value of 1 for 'max output chars per input char',
             // which also tests that the code behaves properly even if the original
             // estimate is incorrect.
-            public CustomUnicodeEncoderBase(params ICodePointFilter[] filters)
-                : base(filters, maxOutputCharsPerInputChar: 1)
+            public CustomUnicodeEncoderBase(CodePointFilter filter)
+                : base(filter, maxOutputCharsPerInputChar: 1)
+            {
+            }
+
+            public CustomUnicodeEncoderBase(params UnicodeBlock[] allowedBlocks)
+                : this(new CodePointFilter(allowedBlocks))
             {
             }
 

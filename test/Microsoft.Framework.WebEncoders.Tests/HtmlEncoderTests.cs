@@ -11,12 +11,11 @@ namespace Microsoft.Framework.WebEncoders
     public class HtmlEncoderTests
     {
         [Fact]
-        public void Ctor_WithCustomFilters()
+        public void Ctor_WithCodePointFilter()
         {
             // Arrange
-            CustomCodePointFilter filter1 = new CustomCodePointFilter('a', 'b');
-            CustomCodePointFilter filter2 = new CustomCodePointFilter('\0', '&', '\uFFFF', 'd');
-            HtmlEncoder encoder = new HtmlEncoder(filter1, filter2);
+            var filter = new CodePointFilter(UnicodeBlocks.None).AllowChars("ab").AllowChars('\0', '&', '\uFFFF', 'd');
+            HtmlEncoder encoder = new HtmlEncoder(filter);
 
             // Act & assert
             Assert.Equal("a", encoder.HtmlEncode("a"));
@@ -29,22 +28,10 @@ namespace Microsoft.Framework.WebEncoders
         }
 
         [Fact]
-        public void Ctor_WithEmptyParameters_DefaultsToNothing()
+        public void Ctor_WithUnicodeBlocks()
         {
             // Arrange
-            HtmlEncoder encoder = new HtmlEncoder(new ICodePointFilter[0]);
-
-            // Act & assert
-            Assert.Equal("&#x61;", encoder.HtmlEncode("a"));
-            Assert.Equal("&#xE9;", encoder.HtmlEncode("\u00E9" /* LATIN SMALL LETTER E WITH ACUTE */));
-            Assert.Equal("&#x2601;", encoder.HtmlEncode("\u2601" /* CLOUD */));
-        }
-
-        [Fact]
-        public void Ctor_WithMultipleParameters_AllowsBitwiseOrOfCodePoints()
-        {
-            // Arrange
-            HtmlEncoder encoder = new HtmlEncoder(CodePointFilters.Latin1Supplement, CodePointFilters.MiscellaneousSymbols);
+            HtmlEncoder encoder = new HtmlEncoder(UnicodeBlocks.Latin1Supplement, UnicodeBlocks.MiscellaneousSymbols);
 
             // Act & assert
             Assert.Equal("&#x61;", encoder.HtmlEncode("a"));
@@ -68,7 +55,7 @@ namespace Microsoft.Framework.WebEncoders
         public void Default_EquivalentToBasicLatin()
         {
             // Arrange
-            HtmlEncoder controlEncoder = new HtmlEncoder(CodePointFilters.BasicLatin);
+            HtmlEncoder controlEncoder = new HtmlEncoder(UnicodeBlocks.BasicLatin);
             HtmlEncoder testEncoder = HtmlEncoder.Default;
 
             // Act & assert
@@ -103,7 +90,7 @@ namespace Microsoft.Framework.WebEncoders
         public void HtmlEncode_AllRangesAllowed_StillEncodesForbiddenChars_Simple(string input, string expected)
         {
             // Arrange
-            HtmlEncoder encoder = new HtmlEncoder(CodePointFilters.All);
+            HtmlEncoder encoder = new HtmlEncoder(UnicodeBlocks.All);
 
             // Act
             string retVal = encoder.HtmlEncode(input);
@@ -116,7 +103,7 @@ namespace Microsoft.Framework.WebEncoders
         public void HtmlEncode_AllRangesAllowed_StillEncodesForbiddenChars_Extended()
         {
             // Arrange
-            HtmlEncoder encoder = new HtmlEncoder(CodePointFilters.All);
+            HtmlEncoder encoder = new HtmlEncoder(UnicodeBlocks.All);
 
             // Act & assert - BMP chars
             for (int i = 0; i <= 0xFFFF; i++)
@@ -178,7 +165,7 @@ namespace Microsoft.Framework.WebEncoders
         public void HtmlEncode_BadSurrogates_ReturnsUnicodeReplacementChar()
         {
             // Arrange
-            HtmlEncoder encoder = new HtmlEncoder(CodePointFilters.All); // allow all codepoints
+            HtmlEncoder encoder = new HtmlEncoder(UnicodeBlocks.All); // allow all codepoints
 
             // "a<unpaired leading>b<unpaired trailing>c<trailing before leading>d<unpaired trailing><valid>e<high at end of string>"
             const string input = "a\uD800b\uDFFFc\uDFFF\uD800d\uDFFF\uD800\uDFFFe\uD800";

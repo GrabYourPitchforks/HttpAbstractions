@@ -11,12 +11,11 @@ namespace Microsoft.Framework.WebEncoders
     public class JavaScriptStringEncoderTests
     {
         [Fact]
-        public void Ctor_WithCustomFilters()
+        public void Ctor_WithCodePointFilter()
         {
             // Arrange
-            CustomCodePointFilter filter1 = new CustomCodePointFilter('a', 'b');
-            CustomCodePointFilter filter2 = new CustomCodePointFilter('\0', '&', '\uFFFF', 'd');
-            JavaScriptStringEncoder encoder = new JavaScriptStringEncoder(filter1, filter2);
+            var filter = new CodePointFilter(UnicodeBlocks.None).AllowChars("ab").AllowChars('\0', '&', '\uFFFF', 'd');
+            JavaScriptStringEncoder encoder = new JavaScriptStringEncoder(filter);
 
             // Act & assert
             Assert.Equal("a", encoder.JavaScriptStringEncode("a"));
@@ -29,22 +28,10 @@ namespace Microsoft.Framework.WebEncoders
         }
 
         [Fact]
-        public void Ctor_WithEmptyParameters_DefaultsToNothing()
+        public void Ctor_WithUnicodeBlocks()
         {
             // Arrange
-            JavaScriptStringEncoder encoder = new JavaScriptStringEncoder(new ICodePointFilter[0]);
-
-            // Act & assert
-            Assert.Equal(@"\u0061", encoder.JavaScriptStringEncode("a"));
-            Assert.Equal(@"\u00E9", encoder.JavaScriptStringEncode("\u00E9" /* LATIN SMALL LETTER E WITH ACUTE */));
-            Assert.Equal(@"\u2601", encoder.JavaScriptStringEncode("\u2601" /* CLOUD */));
-        }
-
-        [Fact]
-        public void Ctor_WithMultipleParameters_AllowsBitwiseOrOfCodePoints()
-        {
-            // Arrange
-            JavaScriptStringEncoder encoder = new JavaScriptStringEncoder(CodePointFilters.Latin1Supplement, CodePointFilters.MiscellaneousSymbols);
+            JavaScriptStringEncoder encoder = new JavaScriptStringEncoder(UnicodeBlocks.Latin1Supplement, UnicodeBlocks.MiscellaneousSymbols);
 
             // Act & assert
             Assert.Equal(@"\u0061", encoder.JavaScriptStringEncode("a"));
@@ -68,7 +55,7 @@ namespace Microsoft.Framework.WebEncoders
         public void Default_EquivalentToBasicLatin()
         {
             // Arrange
-            JavaScriptStringEncoder controlEncoder = new JavaScriptStringEncoder(CodePointFilters.BasicLatin);
+            JavaScriptStringEncoder controlEncoder = new JavaScriptStringEncoder(UnicodeBlocks.BasicLatin);
             JavaScriptStringEncoder testEncoder = JavaScriptStringEncoder.Default;
 
             // Act & assert
@@ -110,7 +97,7 @@ namespace Microsoft.Framework.WebEncoders
         public void JavaScriptStringEncode_AllRangesAllowed_StillEncodesForbiddenChars_Simple(string input, string expected)
         {
             // Arrange
-            JavaScriptStringEncoder encoder = new JavaScriptStringEncoder(CodePointFilters.All);
+            JavaScriptStringEncoder encoder = new JavaScriptStringEncoder(UnicodeBlocks.All);
 
             // Act
             string retVal = encoder.JavaScriptStringEncode(input);
@@ -123,7 +110,7 @@ namespace Microsoft.Framework.WebEncoders
         public void JavaScriptStringEncode_AllRangesAllowed_StillEncodesForbiddenChars_Extended()
         {
             // Arrange
-            JavaScriptStringEncoder encoder = new JavaScriptStringEncoder(CodePointFilters.All);
+            JavaScriptStringEncoder encoder = new JavaScriptStringEncoder(UnicodeBlocks.All);
 
             // Act & assert - BMP chars
             for (int i = 0; i <= 0xFFFF; i++)
@@ -196,7 +183,7 @@ namespace Microsoft.Framework.WebEncoders
         public void JavaScriptStringEncode_BadSurrogates_ReturnsUnicodeReplacementChar()
         {
             // Arrange
-            JavaScriptStringEncoder encoder = new JavaScriptStringEncoder(CodePointFilters.All); // allow all codepoints
+            JavaScriptStringEncoder encoder = new JavaScriptStringEncoder(UnicodeBlocks.All); // allow all codepoints
 
             // "a<unpaired leading>b<unpaired trailing>c<trailing before leading>d<unpaired trailing><valid>e<high at end of string>"
             const string input = "a\uD800b\uDFFFc\uDFFF\uD800d\uDFFF\uD800\uDFFFe\uD800";
@@ -303,7 +290,7 @@ namespace Microsoft.Framework.WebEncoders
             // \u-escape these characters instead of using \' and \".
 
             // Arrange
-            JavaScriptStringEncoder encoder = new JavaScriptStringEncoder(CodePointFilters.All);
+            JavaScriptStringEncoder encoder = new JavaScriptStringEncoder(UnicodeBlocks.All);
 
             // Act
             string retVal = encoder.JavaScriptStringEncode(input);
@@ -319,8 +306,8 @@ namespace Microsoft.Framework.WebEncoders
             // by never emitting HTML-sensitive characters unescaped.
 
             // Arrange
-            JavaScriptStringEncoder javaScriptStringEncoder = new JavaScriptStringEncoder(CodePointFilters.All);
-            HtmlEncoder htmlEncoder = new HtmlEncoder(CodePointFilters.All);
+            JavaScriptStringEncoder javaScriptStringEncoder = new JavaScriptStringEncoder(UnicodeBlocks.All);
+            HtmlEncoder htmlEncoder = new HtmlEncoder(UnicodeBlocks.All);
 
             // Act & assert
             for (int i = 0; i <= 0x10FFFF; i++)
