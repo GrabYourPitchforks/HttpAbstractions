@@ -14,18 +14,24 @@ namespace Microsoft.Framework.WebEncoders
     {
         private AllowedCharsBitmap _allowedCharsBitmap;
 
+        /// <summary>
+        /// Instantiates the filter allowing only the 'Basic Latin' block of characters through.
+        /// </summary>
         public CodePointFilter()
         {
             _allowedCharsBitmap = new AllowedCharsBitmap();
             AllowBlock(UnicodeBlocks.BasicLatin);
         }
 
+        /// <summary>
+        /// Instantiates the filter by cloning the allow list of another filter.
+        /// </summary>
         public CodePointFilter([NotNull] ICodePointFilter other)
         {
             CodePointFilter otherAsCodePointFilter = other as CodePointFilter;
             if (otherAsCodePointFilter != null)
             {
-                otherAsCodePointFilter._allowedCharsBitmap.CloneInto(out this._allowedCharsBitmap);
+                _allowedCharsBitmap = otherAsCodePointFilter.GetAllowedCharsBitmap();
             }
             else
             {
@@ -34,12 +40,20 @@ namespace Microsoft.Framework.WebEncoders
             }
         }
 
+        /// <summary>
+        /// Instantiates the filter where only the provided Unicode character blocks are
+        /// allowed by the filter.
+        /// </summary>
+        /// <param name="allowedBlocks"></param>
         public CodePointFilter(params UnicodeBlock[] allowedBlocks)
         {
             _allowedCharsBitmap = new AllowedCharsBitmap();
             AllowBlocks(allowedBlocks);
         }
 
+        /// <summary>
+        /// Allows all characters in the specified Unicode character block through the filter.
+        /// </summary>
         public CodePointFilter AllowBlock([NotNull] UnicodeBlock block)
         {
             int firstCodePoint = block.FirstCodePoint;
@@ -51,6 +65,9 @@ namespace Microsoft.Framework.WebEncoders
             return this;
         }
 
+        /// <summary>
+        /// Allows all characters in the specified Unicode character blocks through the filter.
+        /// </summary>
         public CodePointFilter AllowBlocks(params UnicodeBlock[] blocks)
         {
             if (blocks != null)
@@ -63,12 +80,18 @@ namespace Microsoft.Framework.WebEncoders
             return this;
         }
 
+        /// <summary>
+        /// Allows the specified character through the filter.
+        /// </summary>
         public CodePointFilter AllowChar(char c)
         {
             _allowedCharsBitmap.AllowCharacter(c);
             return this;
         }
 
+        /// <summary>
+        /// Allows the specified characters through the filter.
+        /// </summary>
         public CodePointFilter AllowChars(params char[] chars)
         {
             if (chars != null)
@@ -81,6 +104,9 @@ namespace Microsoft.Framework.WebEncoders
             return this;
         }
 
+        /// <summary>
+        /// Allows all characters in the specified string through the filter.
+        /// </summary>
         public CodePointFilter AllowChars([NotNull] string chars)
         {
             for (int i = 0; i < chars.Length; i++)
@@ -90,6 +116,9 @@ namespace Microsoft.Framework.WebEncoders
             return this;
         }
 
+        /// <summary>
+        /// Allows all characters approved by the specified filter through this filter.
+        /// </summary>
         public CodePointFilter AllowFilter([NotNull] ICodePointFilter filter)
         {
             foreach (var allowedCodePoint in filter.GetAllowedCodePoints())
@@ -104,11 +133,9 @@ namespace Microsoft.Framework.WebEncoders
             return this;
         }
 
-        internal void CloneAllowedCharsBitmapInto(out AllowedCharsBitmap clone)
-        {
-            this._allowedCharsBitmap.CloneInto(out clone);
-        }
-
+        /// <summary>
+        /// Disallows all characters in the specified Unicode character block through the filter.
+        /// </summary>
         public CodePointFilter ForbidBlock([NotNull] UnicodeBlock block)
         {
             int firstCodePoint = block.FirstCodePoint;
@@ -120,6 +147,9 @@ namespace Microsoft.Framework.WebEncoders
             return this;
         }
 
+        /// <summary>
+        /// Disallows all characters in the specified Unicode character blocks through the filter.
+        /// </summary>
         public CodePointFilter ForbidBlocks(params UnicodeBlock[] blocks)
         {
             if (blocks != null)
@@ -132,12 +162,18 @@ namespace Microsoft.Framework.WebEncoders
             return this;
         }
 
+        /// <summary>
+        /// Disallows the specified character through the filter.
+        /// </summary>
         public CodePointFilter ForbidChar(char c)
         {
             _allowedCharsBitmap.ForbidCharacter(c);
             return this;
         }
 
+        /// <summary>
+        /// Disallows the specified characters through the filter.
+        /// </summary>
         public CodePointFilter ForbidChars(params char[] chars)
         {
             if (chars != null)
@@ -150,6 +186,9 @@ namespace Microsoft.Framework.WebEncoders
             return this;
         }
 
+        /// <summary>
+        /// Disallows all characters in the specified string through the filter.
+        /// </summary>
         public CodePointFilter ForbidChars([NotNull] string chars)
         {
             for (int i = 0; i < chars.Length; i++)
@@ -159,6 +198,18 @@ namespace Microsoft.Framework.WebEncoders
             return this;
         }
 
+        /// <summary>
+        /// Retrieves the bitmap of allowed characters from this filter.
+        /// The returned bitmap is a clone of the original bitmap to avoid unintentional modification.
+        /// </summary>
+        internal AllowedCharsBitmap GetAllowedCharsBitmap()
+        {
+            return _allowedCharsBitmap.Clone();
+        }
+
+        /// <summary>
+        /// Gets an enumeration of all allowed code points.
+        /// </summary>
         public IEnumerable<int> GetAllowedCodePoints()
         {
             for (int i = 0; i < 0x10000; i++)
@@ -170,6 +221,9 @@ namespace Microsoft.Framework.WebEncoders
             }
         }
 
+        /// <summary>
+        /// Wraps the provided filter as a CodePointFilter, avoiding the clone if possible.
+        /// </summary>
         internal static CodePointFilter Wrap(ICodePointFilter filter)
         {
             return (filter as CodePointFilter) ?? new CodePointFilter(filter);

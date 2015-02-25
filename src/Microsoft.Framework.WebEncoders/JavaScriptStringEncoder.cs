@@ -32,7 +32,8 @@ namespace Microsoft.Framework.WebEncoders
         }
 
         /// <summary>
-        /// Instantiates an encoder using an allow list of Unicode blocks.
+        /// Instantiates an encoder specifying which Unicode character blocks are allowed to
+        /// pass through the encoder unescaped.
         /// </summary>
         public JavaScriptStringEncoder(params UnicodeBlock[] allowedBlocks)
             : this(new JavaScriptStringUnicodeEncoder(new CodePointFilter(allowedBlocks)))

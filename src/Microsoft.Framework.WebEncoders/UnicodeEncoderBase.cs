@@ -23,7 +23,7 @@ namespace Microsoft.Framework.WebEncoders
         protected UnicodeEncoderBase(CodePointFilter filter, int maxOutputCharsPerInputChar)
         {
             _maxOutputCharsPerInputChar = maxOutputCharsPerInputChar;
-            filter.CloneAllowedCharsBitmapInto(out _allowedCharsBitmap);
+            _allowedCharsBitmap = filter.GetAllowedCharsBitmap();
 
             // Forbid characters that are special in HTML.
             // Even though this is a common encoder used by everybody (including URL
