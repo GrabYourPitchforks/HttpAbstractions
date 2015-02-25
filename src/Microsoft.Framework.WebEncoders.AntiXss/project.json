@@ -1,0 +1,15 @@
+{
+    "version": "1.0.0-*",
+    "description": "Allows using the Microsoft Web Protection Library's AntiXSS encoders in an ASP.NET 5 application.",
+    "dependencies": {
+        "AntiXSS": "4.3.0",
+        "Microsoft.AspNet.Http.Extensions": "1.0.0-*",
+        "Microsoft.Framework.ConfigurationModel": "1.0.0-*",
+        "Microsoft.Framework.DependencyInjection": "1.0.0-*",
+        "Microsoft.Framework.NotNullAttribute.Internal": { "type": "build", "version": "1.0.0-*" },
+        "Microsoft.Framework.WebEncoders": "1.0.0-*"
+    },
+    "frameworks": {
+        "aspnet50": { }
+    }
+}
