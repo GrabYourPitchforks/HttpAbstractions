@@ -32,10 +32,18 @@ namespace Microsoft.Framework.WebEncoders
         }
 
         /// <summary>
-        /// Instantiates an encoder using a custom allow list of characters.
+        /// Instantiates an encoder using an allow list of Unicode blocks.
         /// </summary>
-        public HtmlEncoder(params ICodePointFilter[] filters)
-            : this(new HtmlUnicodeEncoder(filters))
+        public HtmlEncoder(params UnicodeBlock[] allowedBlocks)
+            : this(new HtmlUnicodeEncoder(new CodePointFilter(allowedBlocks)))
+        {
+        }
+
+        /// <summary>
+        /// Instantiates an encoder using a custom code point filter.
+        /// </summary>
+        public HtmlEncoder(ICodePointFilter filter)
+            : this(new HtmlUnicodeEncoder(CodePointFilter.Wrap(filter)))
         {
         }
 
@@ -97,8 +105,8 @@ namespace Microsoft.Framework.WebEncoders
             // generate at most 10 output chars ("&#x10FFFF;"), which equates to 5 output chars per input char.
             private const int MaxOutputCharsPerInputChar = 8;
 
-            internal HtmlUnicodeEncoder(ICodePointFilter[] filters)
-                : base(filters, MaxOutputCharsPerInputChar)
+            internal HtmlUnicodeEncoder(CodePointFilter filter)
+                : base(filter, MaxOutputCharsPerInputChar)
             {
             }
 
@@ -109,7 +117,7 @@ namespace Microsoft.Framework.WebEncoders
                     HtmlUnicodeEncoder encoder = Volatile.Read(ref _basicLatinSingleton);
                     if (encoder == null)
                     {
-                        encoder = new HtmlUnicodeEncoder(new[] { CodePointFilters.BasicLatin });
+                        encoder = new HtmlUnicodeEncoder(new CodePointFilter());
                         Volatile.Write(ref _basicLatinSingleton, encoder);
                     }
                     return encoder;

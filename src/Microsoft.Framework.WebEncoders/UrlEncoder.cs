@@ -32,10 +32,18 @@ namespace Microsoft.Framework.WebEncoders
         }
 
         /// <summary>
-        /// Instantiates an encoder using a custom allow list of characters.
+        /// Instantiates an encoder using an allow list of Unicode blocks.
         /// </summary>
-        public UrlEncoder(params ICodePointFilter[] filters)
-            : this(new UrlUnicodeEncoder(filters))
+        public UrlEncoder(params UnicodeBlock[] allowedBlocks)
+            : this(new UrlUnicodeEncoder(new CodePointFilter(allowedBlocks)))
+        {
+        }
+
+        /// <summary>
+        /// Instantiates an encoder using a custom code point filter.
+        /// </summary>
+        public UrlEncoder(ICodePointFilter filter)
+            : this(new UrlUnicodeEncoder(CodePointFilter.Wrap(filter)))
         {
         }
 
@@ -98,8 +106,8 @@ namespace Microsoft.Framework.WebEncoders
             // chars to produce 12 output chars "%XX%YY%ZZ%WW", which is 6 output chars per input char.
             private const int MaxOutputCharsPerInputChar = 9;
 
-            internal UrlUnicodeEncoder(ICodePointFilter[] filters)
-                : base(filters, MaxOutputCharsPerInputChar)
+            internal UrlUnicodeEncoder(CodePointFilter filter)
+                : base(filter, MaxOutputCharsPerInputChar)
             {
                 // Per RFC 3987, Sec. 2.2, we want encodings that are safe for
                 // 'isegment', 'iquery', and 'ifragment'. The only thing these
@@ -152,7 +160,7 @@ namespace Microsoft.Framework.WebEncoders
                     UrlUnicodeEncoder encoder = Volatile.Read(ref _basicLatinSingleton);
                     if (encoder == null)
                     {
-                        encoder = new UrlUnicodeEncoder(new[] { CodePointFilters.BasicLatin });
+                        encoder = new UrlUnicodeEncoder(new CodePointFilter());
                         Volatile.Write(ref _basicLatinSingleton, encoder);
                     }
                     return encoder;

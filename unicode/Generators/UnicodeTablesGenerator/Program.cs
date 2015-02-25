@@ -8,32 +8,32 @@ using System.Text.RegularExpressions;
 namespace UnicodeTablesGenerator
 {
     /// <summary>
-    /// This program outputs the 'CodePointFilters.generated.cs' and
-    /// 'CodePointFiltersTests.generated.cs' source files.
+    /// This program outputs the 'UnicodeBlocks.generated.txt' and
+    /// 'CodePointFiltersTests.generated.txt' source files.
     /// </summary>
     /// <remarks>
     /// The generated files require some hand-tweaking. For instance, you'll need
     /// to remove surrogates and private use blocks. The files can then be merged
-    /// into the real 'CodePointFilters.cs' and 'CodePointFiltersTests.cs' files.
+    /// into the *.generated.cs files as appropriate.
     /// </remarks>
     class Program
     {
         private const string _codePointFiltersGeneratedFormat = @"
 /// <summary>
-/// A filter which allows characters in the '{0}' Unicode range.
+/// Represents the '{0}' block in the Unicode Standard.
+/// This block spans code points in the range U+{1}..U+{2}.
 /// </summary>
 /// <remarks>
-/// This range spans the code points U+{1} .. U+{2}.
 /// See http://www.unicode.org/charts/PDF/U{1}.pdf for the full set of characters in this range.
 /// </remarks>
-public static ICodePointFilter {3}
+public static UnicodeBlock {3}
 {{
     get
     {{
-        return GetFilter(ref _{4}, first: '\u{1}', last: '\u{2}');
+        return Volatile.Read(ref _{4}) ?? CreateBlock(ref _{4}, first: '\u{1}', last: '\u{2}');
     }}
 }}
-private static DefinedCharacterCodePointFilter _{4};
+private static UnicodeBlock _{4};
 ";
 
         private const string _codePointFiltersTestsGeneratedFormat = @"
@@ -76,7 +76,7 @@ public void Range_{0}() {{
                     blockNameAsProperty, startCode, endCode);
             }
 
-            File.WriteAllText("CodePointFilters.generated.cs", runtimeCodeBuilder.ToString());
+            File.WriteAllText("UnicodeBlocks.generated.txt", runtimeCodeBuilder.ToString());
             File.WriteAllText("CodePointFiltersTests.generated.cs", testCodeBuilder.ToString());
         }
 
